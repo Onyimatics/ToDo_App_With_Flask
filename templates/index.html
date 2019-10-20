@@ -42,12 +42,29 @@
         {% for d in data %}
         <li><input class="check-completed" data-id="{{ d.id }}" type="checkbox" {% if d.completed %} checked {% endif %}/>
         {{ d.description }}
+        <button class="deleted" data-id="{{ d.id }}">&cross;</button>
         </li>
         {% endfor %}
     </ul>
     <script>
         const todoForm = document.getElementById('form');
         const checkboxes = document.querySelectorAll('.check-completed');
+        const deleteButtons= document.querySelectorAll('.deleted');
+        for (let i = 0; i < deleteButtons.length; i++) {
+            deleteButtons[i].addEventListener('click', (e) => {
+                e.preventDefault();
+                const todoId = e.target.dataset.id;
+                fetch(`/todos/${todoId}/delete`, {
+                    method: 'DELETE'
+                })
+                .then(() => {
+                    document.getElementById('error').className = 'hidden';
+                })
+                .catch(() => {
+                    document.getElementById('error').className = '';
+                })
+            })
+        }
         
         for (let i = 0; i < checkboxes.length; i++) {
         const checkbox = checkboxes[i];
