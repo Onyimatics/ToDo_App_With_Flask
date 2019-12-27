@@ -9,6 +9,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:psql@localhost:54
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+
+# Child's model
 class Todo(db.Model):
     __tablename__ = 'todos'
     id = db.Column(db.Integer, primary_key=True)
@@ -19,11 +21,27 @@ class Todo(db.Model):
     def __repr__(self):
         return f'<Todo {self.id} {self.description}>'
 
+# Parent's model
 class TodoList(db.Model):
     __tablename__ = 'todolists'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(), nullable=False)
     todos = db.relationship('Todo', backref='list', lazy=True)
+
+order_items = db.Table('order_items',
+    db.Column('order_id', db.Integer, db.ForeignKey('order.id'), primary_key=True),
+    db.Column('product_id', db.Integer, db.ForeignKey('product.id'), primary_key=True)
+)
+
+class Order(db.Model):
+  id = db.Column(db.Integer, primary_key=True)
+  status = db.Column(db.String(), nullable=False)
+  products = db.relationship('Product', secondary=order_items,
+      backref=db.backref('orders', lazy=True))
+
+class Product(db.Model):
+  id = db.Column(db.Integer, primary_key=True)
+  name = db.Column(db.String(), nullable=False)
 
 
 @app.route('/todos/create', methods=['POST'])
